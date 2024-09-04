@@ -34,7 +34,7 @@ import java.util.Map;
 public class CrawlingService {
     private static final int DELAY_TIME = 1500;
     private static final int MIN_DUPLICATE_MORPHEME_COUNT = 5;
-    private static final String STOCK_CODE_CONDITION = "000320";
+    private static final String STOCK_CODE_CONDITION = "000650";
 
 
     private final WebDriver webDriver;
@@ -46,30 +46,40 @@ public class CrawlingService {
         List<Stock> stocks = stockRepository.findAll();
 
         for (Stock stock : stocks) {
-            if (stock.getCode().compareToIgnoreCase(STOCK_CODE_CONDITION) <= 0) continue;
+//            if (stock.getCode().compareToIgnoreCase(STOCK_CODE_CONDITION) <= 0) continue;
 
             List<News> newsList = new LinkedList<>();
 
-            String startDate = null;
-            while (startDate == null || startDate.compareToIgnoreCase("0020240801") >= 0) {
-                if (newsList.isEmpty()) {
-                    startDate = "0020240828";
-                } else {
-                    String earliest = newsList.get(newsList.size() - 1).getDate();
+            String startDate = newsRepository.findEarliestDateByStockCode(stock.getCode());
+            while (startDate != null && startDate.compareToIgnoreCase("0020240701") >= 0) {
+//                if (newsList.isEmpty()) {
+//                    startDate = "0020240828";
+//                } else {
+//                    String earliest = newsList.get(newsList.size() - 1).getDate();
+//
+//                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+//                    LocalDate localDate = LocalDate.parse(earliest, formatter).minusDays(1);
+//                    DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("00yyyyMMdd");
+//
+//                    startDate = localDate.format(newFormatter);
+//                }
 
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-                    LocalDate localDate = LocalDate.parse(earliest, formatter).minusDays(1);
-                    DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("00yyyyMMdd");
-
-                    startDate = localDate.format(newFormatter);
-                }
-
-                newsList.addAll(getNewsList(stock, startDate));
+                List<News> newNewsList = getNewsList(stock, startDate);
+                newsList.addAll(newNewsList);
                 log.info("news list size: {}", newsList.size());
+
+                String earliest = newsList.get(newsList.size() - 1).getDate();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                LocalDate localDate = LocalDate.parse(earliest, formatter).minusDays(1);
+                DateTimeFormatter newFormatter = DateTimeFormatter.ofPattern("00yyyyMMdd");
+
+                startDate = localDate.format(newFormatter);
             }
 
-            log.info(newsList.toString());
+            if (newsList.isEmpty()) continue;
+
             dedupeNewsList(newsList);
+            log.info("중복 제거 리스트 사이즈: {}", newsList.size());
 
             List<News> crawledNewsList = new ArrayList<>();
             for (News news : newsList) {

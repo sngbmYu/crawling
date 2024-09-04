@@ -16,12 +16,7 @@ public class AppConfig {
     @Bean
     RestClient.Builder restClientBuilder() {
         return RestClient.builder()
-                .defaultHeaders(new Consumer<HttpHeaders>() {
-                    @Override
-                    public void accept(HttpHeaders httpHeaders) {
-                        httpHeaders.set("Accept-Encoding", "gzip, deflate");
-                    }
-                });
+                .defaultHeaders(httpHeaders -> httpHeaders.set("Accept-Encoding", "gzip, deflate"));
     }
 
     @Bean
