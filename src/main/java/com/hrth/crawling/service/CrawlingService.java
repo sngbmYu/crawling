@@ -50,8 +50,10 @@ public class CrawlingService {
 
             List<News> newsList = new LinkedList<>();
 
-            String startDate = newsRepository.findEarliestDateByStockCode(stock.getCode());
-            while (startDate != null && startDate.compareToIgnoreCase("0020240701") >= 0) {
+//            String startDate = newsRepository.findEarliestDateByStockCode(stock.getCode());
+            String startDate = "0020241005";
+            String endDate = newsRepository.findLatestDateByStockCode(stock.getCode());
+            while (startDate.compareTo("00" + endDate) > 0) {
 //                if (newsList.isEmpty()) {
 //                    startDate = "0020240828";
 //                } else {
@@ -65,7 +67,13 @@ public class CrawlingService {
 //                }
 
                 List<News> newNewsList = getNewsList(stock, startDate);
-                newsList.addAll(newNewsList);
+                List<News> filteredList = newNewsList.stream()
+                        .filter(news -> news.getDate().compareTo(endDate) > 0)
+                        .toList();
+
+                if (filteredList.isEmpty()) break;
+
+                newsList.addAll(filteredList);
                 log.info("news list size: {}", newsList.size());
 
                 String earliest = newsList.get(newsList.size() - 1).getDate();
@@ -101,6 +109,8 @@ public class CrawlingService {
 
             String title = currentNews.getTitle();
             if (title == null || title.isEmpty()) continue;
+            // 인포스탁 필요 없는 뉴스 거르기
+            if (currentNews.getPublisher().equals("인포스탁")) continue;
 
             KomoranResult currentResult = komoran.analyze(title);
             List<String> currentMorphemes = getMorphemes(currentResult);

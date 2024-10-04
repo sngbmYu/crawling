@@ -18,7 +18,7 @@ public class NewsRepository {
 
     @Transactional
     public void batchInsert(List<News> newsList) {
-        String sql = "INSERT INTO news_temp" +
+        String sql = "INSERT INTO news" +
                 " (news_date, title, url, stock_code, publisher)" +
                 " VALUES (?,?,?,?,?)";
 

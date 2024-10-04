@@ -21,7 +21,7 @@ public class AppConfig {
 
     @Bean
     public WebDriver webDriver() {
-        WebDriverManager.chromedriver().browserVersion("127.0.6533.119").setup();
+        WebDriverManager.chromedriver().browserVersion("129.0.6668.90").setup();
         return new ChromeDriver();
     }
 }
